@@ -38,6 +38,12 @@ try:
 except ImportError:
     PLONE4 = False
 
+if PLONE4:
+    # These imports are here to support a Plone4 only fix
+    from zope.event import notify
+    from Products.PlonePAS.events import UserLoggedInEvent
+
+
 LOG = getLogger( 'anz.casclient' )
 
 addAnzCASClientForm = PageTemplateFile(
@@ -231,6 +237,19 @@ class AnzCASClient( BasePlugin, Cacheable ):
             # Save current user's session to be used by 'Single Sign Out'
             if not session:
                 session = sdm.getSessionData( create=1 )
+
+            if PLONE4:
+                # plone.protect would rollback the transaction here,
+                # losing session and the auth as well.
+                # Since this is a problem with any login,
+                # plone.protect attaches an event handler
+                # on the IUserLoggedIn event
+                # so that the request is marked as "write safe".
+                # It is VERY important to do this
+                # only when we are in a login
+                # and the user has effectively logged in
+                # (which is the case here)
+                notify(UserLoggedInEvent(assertion.getPrincipal()))
 
             # Get session token as id, it is more reliable
             sessionId = session.getContainerKey()

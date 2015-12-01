@@ -4,7 +4,8 @@ Changelog
 1.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+ - Fixed a problem with plone.protector for patched Plone 4s
+   (and possibly Plone 5). [simonedeponti]
 
 
 1.1.1 (2015-08-06)
